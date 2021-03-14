@@ -3,10 +3,13 @@ import time
 import numpy as np
 
 
-class vBot:
+class vrepBot:
 
 	def __init__(self):
 		self.totalJoints = 7
+		self.clientID = None
+		self.JointHandles = None
+		self.GripperHandles = None
 		
 		
 	def connect(self):
