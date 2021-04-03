@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   rostest
   rosunit
   actionlib_msgs
-  dragoon_messages
 )
 
 generate_messages(
