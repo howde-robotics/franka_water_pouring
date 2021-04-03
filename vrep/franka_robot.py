@@ -124,9 +124,12 @@ class FrankaEmika(vri.vrepBot):
         return self.jointAngles[0:-1], error
     
     def get_pose(self):
+        self.update_joints()
+        self.forward(self.jointAngles)
         return self.currentTransforms[:, :, -1]
 
     def get_joints(self):
+        self.update_joints()
         return self.jointAngles
 
     def goto_pose(self, goalPose):

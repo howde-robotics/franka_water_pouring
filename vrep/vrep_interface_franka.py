@@ -30,7 +30,7 @@ class vrepBot:
 		# Create connections to joints and sensors
 		FrankaJointName = "Franka_joint"
 
-		self.JointHandles=[vrep.simxGetObjectHandle(self.clientID,FrankaJointName+str(jointNum),vrep.simx_opmode_blocking)[1] for jointNum in range(self.totalJoints)]
+		self.JointHandles=[vrep.simxGetObjectHandle(self.clientID,FrankaJointName+str(jointNum + 1),vrep.simx_opmode_blocking)[1] for jointNum in range(self.totalJoints)]
 
 		# get the gripper handle
 		self.GripperHandles = vrep.simxGetObjectHandle(self.clientID, "RG2_openCloseJoint", vrep.simx_opmode_blocking)[1]
