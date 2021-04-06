@@ -15,8 +15,6 @@
   <depend>nav_msgs</depend>
   <depend>tf</depend>
   <depend>actionlib_msgs</depend>
-  <depend>dragoon_messages</depend>
-
   <exec_depend>message_generation</exec_depend>
 
   <test_depend>rostest</test_depend>
