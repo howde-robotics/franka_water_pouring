@@ -1,84 +1,79 @@
-class StateName():
+import abc
+class StateName(abc.ABC):
     def __init__(self):
         self.stateName = "name of process"
         # change this to true if the state completes successfully
         self.success = False
+        # tuples must be in (Event name, state class name) format
+        self.transitionTable = []
 
     # do the business of running this state
-    def run(self):
-        pass
+    def run(self, context):
+        print("[%s] Running" % self.stateName)
 
-class FillingCup():
+
+    def handler(self, eventDict, stateDict):
+        # after completion, check events and transitions
+        for transitionPair in self.transitionTable:
+            transitionEvent = eventDict[transitionPair[0]]
+            transitionTo = stateDict[transitionPair[1]]
+
+            if transitionEvent:
+                print("[%s] Transitioning to %s" % (self.stateName, transitionTo.stateName))
+                return transitionTo
+        
+        return None
+
+class FillingCup(StateName):
     def __init__(self):
-        self.stateName = "Filling Cup"
-        self.success = False
+        self.stateName = "FillingCup"
+        self.transitionTable = [("WATER_LOW", "StoppingPump")]  
 
 
-    def run(self):
-            pass
-
-
-class StoppingPump():
+class StoppingPump(StateName):
     def __init__(self):
-        self.stateName = "Stopping Pump"
-        self.success = False
+        self.stateName = "StoppingPump"
+        self.transitionTable = [("PUMPS_OFF", "MoveToPourCup")]  
 
 
-    def run(self):
-            pass
 
-class MoveToPourCup():
+class MoveToPourCup(StateName):
     def __init__(self):
-        self.stateName = "Move To Pour Cup"
-        self.success = False
+        self.stateName = "MoveToPourCup"
+        self.transitionTable = [("WATER_LOW", "GraspCup"), ("WATER_HIGH", "UngraspCup")]  
 
 
-    def run(self):
-            pass
 
-class MoveToScaleCup():
+class MoveToScaleCup(StateName):
     def __init__(self):
-        self.stateName = "Move To Scale Cup"
-        self.success = False
+        self.stateName = "MoveToScaleCup"
+        self.transitionTable = [("GOAL_REACHED", "PourWater")]  
 
 
-    def run(self):
-            pass
 
-class GraspCup():
+class GraspCup(StateName):
     def __init__(self):
-        self.stateName = "Grasp Cup"
-        self.success = False
+        self.stateName = "GraspCup"
+        self.transitionTable = [("GRASPED_CUP", "MoveToScaleCup")]
 
 
-    def run(self):
-            pass
-
-class UngraspCup():
+class UngraspCup(StateName):
     def __init__(self):
-        self.stateName = "Ungrasp Cup"
-        self.success = False
+        self.stateName = "UngraspCup"
+        self.transitionTable = [("UNGRASPED_CUP", "MoveHome")]
 
 
-    def run(self):
-            pass
-
-class MoveHome():
+class MoveHome(StateName):
     def __init__(self):
-        self.stateName = "Move Home"
-        self.success = False
+        self.stateName = "MoveHome"
+        self.transitionTable = [("GOAL_REACHED", "FillingCup")]
 
-    def run(self):
-        pass
 
-class PourWater():
+class PourWater(StateName):
     def __init__(self):
-        self.stateName = "Pour Water"
-        self.success = False
+        self.stateName = "PourWater"
+        self.transitionTable = [("WATER_HIGH", "MoveToPourCup")]
 
-
-    def run(self):
-            pass
 
 # list of all the states
-stateList = [FillingCup, StoppingPump, MoveToPourCup, MoveToScaleCup, GraspCup, UngraspCup, MoveHome]
+stateList = [FillingCup, StoppingPump, MoveToPourCup, MoveToScaleCup, GraspCup, UngraspCup, MoveHome, PourWater]
