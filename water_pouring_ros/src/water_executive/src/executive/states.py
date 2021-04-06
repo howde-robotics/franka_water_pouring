@@ -1,5 +1,5 @@
 import abc
-class StateName(abc.ABC):
+class StateName():
     def __init__(self):
         self.stateName = "name of process"
         # change this to true if the state completes successfully

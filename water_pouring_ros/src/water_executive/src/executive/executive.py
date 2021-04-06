@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# import rospy
+import rospy
 import numpy as np 
 import abc
 import states
@@ -28,6 +28,14 @@ class WaterExecutive():
             "WATER_HIGH"        :False
         }
 
+        # run the node
+        self.rosInterface()
+
+        while not rospy.is_shutdown():
+            self.stateMachine()
+            self.updateEvents()
+            rospy.sleep(1.0/self.timerFreq)
+
     def stateMachine(self):
         self.state.run(self)
         newState = self.state.handler(self.eventDict, self.stateDict)
@@ -52,7 +60,14 @@ class WaterExecutive():
             self.eventDict[target] = not self.eventDict[target]
             print("[EVENTS] %s changed to %r" % (target, self.eventDict[target]))
 
+    # all the ros stuff
+    def rosInterface(self):
+        self.timerFreq = float(rospy.get_param("~exec_spin_rate", '20'))
 
 
 if __name__ == "__main__":
-    executive = WaterExecutive("FillingCup")
+    rospy.init_node("water_executive")
+    try:
+        executive = WaterExecutive("FillingCup")
+    except rospy.ROSInitException:
+        pass

@@ -1,7 +1,7 @@
 <package format="2">
-  <name>dragoon_executive</name>
+  <name>water_executive</name>
   <version>0.0.1</version>
-  <description>where the autonomy happens</description>
+  <description>For autonomy project</description>
   <maintainer email="bkolligs@andrew.cmu.edu">Ben Kolligs</maintainer>
   <license>proprietary</license>
 

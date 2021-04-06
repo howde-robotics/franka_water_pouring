@@ -1,0 +1,7 @@
+<launch>
+  <arg name="timerFreq" default="20" doc="The rate of the program"/>
+
+  <node pkg="water_executive" type="executive.py" name="water_executive" output="screen">
+    <param name="timerFreq_" value="$(arg timerFreq)" type ="double"/>
+  </node>
+</launch>
