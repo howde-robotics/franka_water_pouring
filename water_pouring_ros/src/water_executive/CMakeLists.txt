@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   rostest
   rosunit
   actionlib_msgs
-  dragoon_messages
 )
 
 generate_messages(
@@ -35,10 +34,9 @@ include_directories(
 
 # add executables from your source code, i.e. compile it
 # .py code are not included here as they do not need to be compiled
-add_executable(simple_node453 
-  src/simple_node/simple_node.cpp
+add_executable(executive_node 
+  src/executive/executive.cpp
 )
-add_library(myAlgo453 src/myAlgo.cpp)
 
 if(CATKIN_ENABLE_TESTING)
 
@@ -50,16 +48,11 @@ if(CATKIN_ENABLE_TESTING)
   # ${GTEST_LIBRARIES}
   # )
 
-  catkin_add_gtest(unittest453 test/unittest.cpp)
-  target_link_libraries(unittest453
-  myAlgo453
+  catkin_add_gtest(test_executive test/unittest.cpp)
+  target_link_libraries(test_executive
   # ${YAML_CPP_LIBRARIES}
   ${catkin_LIBRARIES} 
   ${GTEST_LIBRARIES}
   )
 endif()
 
-target_link_libraries(simple_node453
-  myAlgo453
-  ${catkin_LIBRARIES}
-  )
