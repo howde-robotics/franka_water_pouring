@@ -3,59 +3,114 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Bool.h>
 
-HX711 scale;
+HX711 scaleTarget;
+HX711 scaleFill;
 ros::NodeHandle nh;
 
-const uint8_t scaleDataPin = 6;
-const uint8_t scaleClockPin = 7;
-const uint8_t pumpToCupPin = 8;
-const uint8_t pumpToReservoirPin = 9;
+const uint8_t scaleFillDataPin = 4;
+const uint8_t scaleFillClockPin = 5;
+const uint8_t scaleTargetDataPin = 6;
+const uint8_t scaleTargetClockPin = 7;
+const uint8_t pumpToCupPin = 9;
+const uint8_t pumpToFillPin = 8;
 
 unsigned long StartTime;
 unsigned long EndTime;
 
-std_msgs::Float32 massData;
-bool pumpCmd = false;
+std_msgs::Float32 massTargetData;
+std_msgs::Float32 massFillData;
+bool pumpCupCmd = false;
+bool pumpFillCmd = false;
 
-ros::Publisher massDataPub("mass_data", &massData);
+float scaleTarget_data = 0;
+float scaleFill_data = 0;
+
+enum kState{
+  pumpToFillCup,
+  pumpToFrankaCup,
+  idle
+};
+
+const float emaAlpha = 2.0/(1 + 20);//exponential moving average weighting term
+
+kState state = idle;
+
+ros::Publisher massTargetDataPub("mass_target", &massTargetData);
+ros::Publisher massFillDataPub("mass_fill", &massFillData);
 
 void togglePumpCup(const std_msgs::Bool& msg) {
 
-  bool state = msg.data;
-  if (state == true)
+  if (msg.data)
   {
-    pumpCmd = true;
+    state = pumpToFillCup;
   } else 
   {
-    pumpCmd = false;
+    state = idle;
   }
 }
 ros::Subscriber<std_msgs::Bool> togglePumpCupSub("/toggle_pump_to_cup", &togglePumpCup);
 
 void setup()
 {
-  scale.begin(scaleDataPin, scaleClockPin);
+  scaleTarget.begin(scaleTargetDataPin, scaleTargetClockPin);
+  scaleFill.begin(scaleFillDataPin, scaleFillClockPin);
 
   pinMode(pumpToCupPin, OUTPUT);
   digitalWrite(pumpToCupPin, HIGH);
 
+  pinMode(pumpToFillPin, OUTPUT);
+  digitalWrite(pumpToFillPin, HIGH);
+
   nh.initNode();
-  nh.advertise(massDataPub);
+  nh.advertise(massTargetDataPub);
+  nh.advertise(massFillDataPub);
   nh.subscribe(togglePumpCupSub);
+  delay(3000);
 }
 
 void loop()
 {
-  float scale_data = scale.get_units(1);
-  massData.data = scale_data;
-  massDataPub.publish(&massData);
-
-  if (scale_data > 100000)
+  float temp = scaleTarget.get_units(1);
+  if (temp > 50000 && temp < 350000)
   {
-    pumpCmd = false;
+    scaleTarget_data = (emaAlpha * temp) + (1.0 - emaAlpha) * scaleTarget_data;
+    massTargetData.data = scaleTarget_data;
+    massTargetDataPub.publish(&massTargetData);
   }
-  
-  digitalWrite(pumpToCupPin, !pumpCmd);
+
+  temp = scaleFill.get_units(1);
+  if (temp > 150000 && temp < 450000)
+  {
+    scaleFill_data = (emaAlpha * temp) + (1.0 - emaAlpha) * scaleFill_data;
+    massFillData.data = scaleFill_data;
+    massFillDataPub.publish(&massFillData);
+  }
+
+
+  if (state == pumpToFillCup)
+  {
+    if (scaleFill_data < 350000)
+    {
+      pumpFillCmd = true;
+    } else
+    {
+      pumpFillCmd = false;
+      state = pumpToFrankaCup;
+    }
+  } else if (state == pumpToFrankaCup)
+  {
+    if (scaleFill_data > 200000)
+    {
+      pumpCupCmd = true;
+    } else
+    {
+      pumpCupCmd = false;
+      state = idle;
+    }
+  }
+ 
+  digitalWrite(pumpToCupPin, !pumpCupCmd);
+  digitalWrite(pumpToFillPin, !pumpFillCmd);
 
   nh.spinOnce();
 }
