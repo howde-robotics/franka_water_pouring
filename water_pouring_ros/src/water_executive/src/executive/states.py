@@ -85,6 +85,16 @@ class Training(StateName):
         while input("Continue? y/n") != "y":
             pass
 
+class TrainGrip(StateName):
+    def __init__(self):
+        self.stateName = "TrainGrip"
+        self.transitionTable = [("IDLE"), "Idle"]
+
+    def run(self, context):
+        Franka.goto_gripper(width=0.045, grasp=True, force=5)
+        # update the event in the context
+        context.eventDict["GRASPED_CUP"] = True
+
 class Idle(StateName):
     def __init__(self):
         self.stateName = "Idle"
@@ -129,7 +139,15 @@ class MoveToScaleCup(StateName):
 class GraspCup(StateName):
     def __init__(self):
         self.stateName = "GraspCup"
-        self.transitionTable = [("GRASPED_CUP", "MoveToScaleCup")]
+        self.transitionTable = [
+            ("GRASPED_CUP", "MoveToScaleCup"),
+            ("IDLE", "Idle")
+        ]
+
+    def run(self, context):
+        Franka.goto_gripper(width=0.045, grasp=True, force=5)
+        # update the event in the context
+        context.eventDict["GRASPED_CUP"] = True
 
 
 class UngraspCup(StateName):

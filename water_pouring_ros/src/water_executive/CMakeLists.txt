@@ -11,6 +11,12 @@ find_package(catkin REQUIRED COMPONENTS
   rostest
   rosunit
   actionlib_msgs
+  message_generation
+)
+
+add_message_files(
+  FILES
+  waterEvents.msg
 )
 
 generate_messages(
