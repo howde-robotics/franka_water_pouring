@@ -51,7 +51,7 @@ class RRTConnect:
 
     def sample_valid_joints(self):
         q = np.random.random(self._fr.num_dof) * (self._fr.joint_limits_high - self._fr.joint_limits_low) + self._fr.joint_limits_low
-        q[6] = 0.
+        q[6] = np.pi/4
         return q
 
     def project_to_constraint(self, q0, constraint):
