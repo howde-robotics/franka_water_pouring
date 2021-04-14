@@ -2,6 +2,7 @@
 import rospy
 import numpy as np 
 import abc
+from std_msgs.msg import String
 import states
 
 
@@ -18,25 +19,20 @@ class WaterExecutive():
         self.state = self.stateDict[entryState]
 
         # events for the system
-        self.eventDict = {
-            "WATER_POURED"      :False,
-            "GOAL_REACHED"      :False,
-            "GRASPED_CUP"       :False,
-            "WATER_LOW"         :False,
-            "PUMPS_OFF"         :False,
-            "UNGRASPED_CUP"     :False,
-            "WATER_HIGH"        :False
-        }
+        self.eventDict = states.eventDict
+
+        print("[EXEC] Resetting Robot")
+        states.Franka.reset_joints()
 
         # run the node
         self.rosInterface()
 
         while not rospy.is_shutdown():
             self.stateMachine()
-            self.updateEvents()
             rospy.sleep(1.0/self.timerFreq)
 
     def stateMachine(self):
+        print("[EXEC] Run State: %s" % self.state.stateName, end="\r")
         self.state.run(self)
         newState = self.state.handler(self.eventDict, self.stateDict)
 
@@ -46,8 +42,10 @@ class WaterExecutive():
 
 
     # gather events
-    def updateEvents(self):
-        pass
+    def eventCallback(self, msg):
+        event = msg.data
+        print("\n[EXEC] Event Registered: %s" % event)
+        self.resetEvents(target=event)
 
     # reset events to false, if passed an arg will toggle event
     def resetEvents(self, target=None):
@@ -63,11 +61,12 @@ class WaterExecutive():
     # all the ros stuff
     def rosInterface(self):
         self.timerFreq = float(rospy.get_param("~exec_spin_rate", '20'))
+        self.subEvents = rospy.Subscriber("/water_pouring/events", String, queue_size=1, callback=self.eventCallback)
 
 
 if __name__ == "__main__":
-    rospy.init_node("water_executive")
+    # rospy.init_node("water_executive")
     try:
-        executive = WaterExecutive("FillingCup")
+        executive = WaterExecutive("Idle")
     except rospy.ROSInitException:
         pass
