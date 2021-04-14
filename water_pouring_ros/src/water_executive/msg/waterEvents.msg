@@ -1,4 +1,5 @@
 Header Header 
+string CurState
 bool WATER_POURED 
 bool GOAL_REACHED
 bool GRASPED_CUP 

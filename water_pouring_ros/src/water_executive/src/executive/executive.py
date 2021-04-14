@@ -4,6 +4,7 @@ import numpy as np
 import abc
 from std_msgs.msg import String
 import states
+# from water_executive.msg import waterEvents
 
 
 class WaterExecutive():
@@ -29,6 +30,7 @@ class WaterExecutive():
 
         while not rospy.is_shutdown():
             self.stateMachine()
+            # self.pubState()
             rospy.sleep(1.0/self.timerFreq)
 
     def stateMachine(self):
@@ -40,6 +42,10 @@ class WaterExecutive():
         if newState is not None:
             self.state = newState
 
+    # def pubState(self):
+    #     outMsg = waterEvents()
+    #     outMsg.Header = rospy.Time.now()
+    #     outMsg.curState = self.state.stateName
 
     # gather events
     def eventCallback(self, msg):
@@ -62,11 +68,12 @@ class WaterExecutive():
     def rosInterface(self):
         self.timerFreq = float(rospy.get_param("~exec_spin_rate", '20'))
         self.subEvents = rospy.Subscriber("/water_pouring/events", String, queue_size=1, callback=self.eventCallback)
+        # self.statePublisher = rospy.Publisher("/water_pouring/state", waterEvents, queue_size=1)
 
 
 if __name__ == "__main__":
     # rospy.init_node("water_executive")
     try:
-        executive = WaterExecutive("Idle")
+        executive = WaterExecutive("FillingCup")
     except rospy.ROSInitException:
         pass
