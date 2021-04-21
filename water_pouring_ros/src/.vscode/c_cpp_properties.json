@@ -1,0 +1,36 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/benjamin/dragoon/ros_system_dragoon/devel/include/**",
+                "/home/benjamin/moonranger/autonomy/devel/include/**",
+                "/opt/ros/melodic/include/**",
+                "/home/benjamin/moonranger/autonomy/src/position_estimator/cspice/include/**",
+                "/home/benjamin/moonranger/autonomy/src/sensor_drivers/camera_driver/vision_opencv/cv_bridge/include/**",
+                "/home/benjamin/moonranger/autonomy/src/sensor_drivers/camera_driver/image_pipeline/depth_image_proc/include/**",
+                "/home/benjamin/dragoon/ros_system_dragoon/src/dragoon_bringup/include/**",
+                "/home/benjamin/dragoon/ros_system_dragoon/src/dragoon_executive/include/**",
+                "/home/benjamin/dragoon/ros_system_dragoon/src/dragoon_simulation/include/**",
+                "/home/benjamin/moonranger/autonomy/src/drive_cmd/include/**",
+                "/home/benjamin/moonranger/autonomy/src/sensor_drivers/stim300/include/**",
+                "/home/benjamin/moonranger/autonomy/src/sensor_drivers/camera_driver/vision_opencv/image_geometry/include/**",
+                "/home/benjamin/moonranger/autonomy/src/sensor_drivers/camera_driver/image_pipeline/image_proc/include/**",
+                "/home/benjamin/moonranger/autonomy/src/position_estimator/kinematics/include/**",
+                "/home/benjamin/moonranger/autonomy/src/robot_localization/include/**",
+                "/home/benjamin/moonranger/autonomy/src/sensor_drivers/camera_driver/image_pipeline/stereo_image_proc/include/**",
+                "/home/benjamin/moonranger/autonomy/src/position_estimator/sunsensor_pose_estimation/include/**",
+                "/home/benjamin/dragoon/ros_system_dragoon/src/template_ros_node/include/**",
+                "/home/benjamin/dragoon/ros_system_dragoon/src/velodyne_simulator/velodyne_gazebo_plugins/include/**",
+                "/home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/src/water_executive/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}

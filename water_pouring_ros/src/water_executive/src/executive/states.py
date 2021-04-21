@@ -1,5 +1,7 @@
 from autolab_core import RigidTransform
 from frankapy import FrankaArm
+from std_msgs.msg import Bool
+import time
 import numpy as np
 
 # main franka object
@@ -29,32 +31,36 @@ targetPourCupGripper = RigidTransform(
     rotation = np.array([[ 0.99875038, -0.04795637,  0.01336468],
                          [-0.04786111, -0.99881725, -0.00735915],
                          [ 0.01370179,  0.0067103,  -0.99988361]]),
-    translation=np.array([0.47204678, -0.16422077,  0.37084254]),
+    translation=np.array([ 0.38429699, -0.28107915,  0.56759486]),
     from_frame="franka_tool",
     to_frame="world"
 
 )
 
+jointFillCup =  np.array([-0.00523853, -0.02406041,  0.00771755, -2.39707949, -0.0693488,   3.73495897,  0.78488679])
+jointPourCup = np.array([ 0.59937575, -0.70281775, -1.05938841, -2.45454394, -0.72683186,  3.53392083, 0.78463731])
+jointPour = np.array([ 0.59937575, -0.70281775, -1.05938841, -2.45454394, -0.72683186,  3.53392083, np.pi/1.2])
+
 targetPourWater = RigidTransform(
-    rotation = np.array([[-0.02478788,  0.01748741,  0.99953976],
-                         [ 0.03187658, -0.99931511,  0.01827435],
-                         [ 0.99917476,  0.03231489,  0.02421393]]),
+    rotation = np.array([[-0.03620562, -0.00390866,  0.99933672],
+                         [-0.7004525,  -0.71314301, -0.02816644],
+                         [ 0.71278008, -0.70100769,  0.02308195]]),
     translation=np.array([ 0.40814904, -0.06825581,  0.57436334]),
     from_frame='franka_tool',
     to_frame="world"
 )
 
 eventDict = {
-    "WATER_POURED"      :False,
     "GOAL_REACHED"      :False,
-    "GRASPED_CUP"       :False,
-    "WATER_LOW"         :False,
-    "PUMPS_OFF"         :False,
-    "UNGRASPED_CUP"     :False,
-    "WATER_HIGH"        :False,
+    "FILL_WATER_LOW"    :False,
+    "SCALE_WATER_LOW"   :False,
+    "SCALE_WATER_HIGH"  :False,
+    "FILL_WATER_HIGH"   :False,
     "TRAIN"             :False,
     "IDLE"              :False,
-    "TRAIN_GRIP"        :False
+    "TRAIN_GRIP"        :False,
+    "TRAIN_POUR"        :False,
+    "TRAIN_FILL"        :False
     }
 
 # abstract state class
@@ -89,11 +95,12 @@ class Training(StateName):
         self.transitionTable = [("IDLE", "Idle")] 
 
     def run(self, context):
-        Franka.reset_joints()
+        # Franka.reset_joints()
         # pose = RigidTransform(rotation=np.eye(3), translation=np.array([1, 1, 1]), from_frame='franka_tool', to_frame='world')
         # Franka.goto_pose(pose)
         Franka.run_guide_mode(10, block=True)
         print("[%s] Current pose:\n" % self.stateName, Franka.get_pose())
+        print("[%s] Current joints:\n" % self.stateName, Franka.get_joints())
 
         while input("Continue? y/n") != "y":
             pass
@@ -115,83 +122,82 @@ class Idle(StateName):
         self.stateName = "Idle"
         self.transitionTable = [
             ("TRAIN", "Training"),
-            ("TRAIN_GRIP", "TrainGrip")
+            ("TRAIN_GRIP", "TrainGrip"),
+            ("SCALE_WATER_LOW", "FillingCup"),
+            ("TRAIN_POUR", "MoveToScaleCup"),
+            ("TRAIN_FILL", "MoveToFillPose")
             ] 
 
     
     def run(self, context):
+        context.eventDict["GOAL_REACHED"] = False
+        if context.mass_target < context.maxMass:
+            context.eventDict["SCALE_WATER_LOW"] = True
+            context.eventDict["SCALE_WATER_HIGH"] = False
         pass
+
+        if context.eventDict["SCALE_WATER_HIGH"]:
+            Franka.reset_joints()
+
 
 class FillingCup(StateName):
     def __init__(self):
         self.stateName = "FillingCup"
-        self.transitionTable = [("WATER_LOW", "MoveToPourCup")]  
+        self.transitionTable = [("FILL_WATER_LOW", "MoveToScaleCup"),("IDLE", "Idle")]  
+        self.hasPumped = False
 
     def run(self, context):
-        Franka.goto_pose(targetFillCupGripper)
+        Franka.goto_joints(jointFillCup)
+        
+        pump = Bool()
+        pump.data = True
+        if not self.hasPumped:
+            context.pumpPub.publish(pump)
+            self.hasPumped = True
+        if context.pump_is_done:
+            context.pump_is_done = False
+            self.hasPumped = False
+            context.eventDict["FILL_WATER_LOW"] = True
 
 
-
-
-class StoppingPump(StateName):
+class MoveToFillPose(StateName):
     def __init__(self):
-        self.stateName = "StoppingPump"
-        self.transitionTable = [("PUMPS_OFF", "MoveToPourCup")]  
-
-
-
-class MoveToPourCup(StateName):
-    def __init__(self):
-        self.stateName = "MoveToPourCup"
-        self.transitionTable = [("WATER_LOW", "GraspCup"), ("WATER_HIGH", "UngraspCup")]  
+        self.stateName = "MoveToFillPose"
+        self.transitionTable = [("GOAL_REACHED", "Idle"),("IDLE", "Idle")]  
 
     def run(self, context):
-        Franka.goto_pose(targetPourCupGripper)
+        Franka.goto_joints(jointFillCup)
+        context.eventDict["GOAL_REACHED"] = True
 
 
 
 class MoveToScaleCup(StateName):
     def __init__(self):
         self.stateName = "MoveToScaleCup"
-        self.transitionTable = [("GOAL_REACHED", "PourWater")]  
+        self.transitionTable = [("GOAL_REACHED", "PourWater"),("IDLE", "Idle")]  
 
     def run(self, context):
-        Franka.goto_pose(targetPourWater)
+        context.eventDict["FILL_WATER_LOW"] = False
+        Franka.goto_joints(jointPourCup)
+        context.eventDict["GOAL_REACHED"] = True
 
-
-
-class GraspCup(StateName):
-    def __init__(self):
-        self.stateName = "GraspCup"
-        self.transitionTable = [
-            ("GRASPED_CUP", "MoveToScaleCup"),
-            ("IDLE", "Idle")
-        ]
-
-    def run(self, context):
-        Franka.goto_gripper(width=0.045, grasp=True, force=5)
-        # update the event in the context
-        context.eventDict["GRASPED_CUP"] = True
-
-
-class UngraspCup(StateName):
-    def __init__(self):
-        self.stateName = "UngraspCup"
-        self.transitionTable = [("UNGRASPED_CUP", "MoveHome")]
-
-
-class MoveHome(StateName):
-    def __init__(self):
-        self.stateName = "MoveHome"
-        self.transitionTable = [("GOAL_REACHED", "FillingCup")]
 
 
 class PourWater(StateName):
     def __init__(self):
         self.stateName = "PourWater"
-        self.transitionTable = [("WATER_HIGH", "MoveToPourCup")]
+        self.transitionTable = [("SCALE_WATER_LOW", "MoveToFillPose"),("IDLE", "Idle"), ("SCALE_WATER_HIGH", "Idle")]
+
+    def run(self, context):
+        context.eventDict["GOAL_REACHED"] = False
+        Franka.goto_joints(jointPour)
+
+        if context.mass_target > context.maxMass:
+            context.eventDict["SCALE_WATER_HIGH"] = True
+            context.eventDict["SCALE_WATER_LOW"] = False
+
 
 
 # list of all the states
-stateList = [FillingCup, StoppingPump, MoveToPourCup, MoveToScaleCup, GraspCup, UngraspCup, MoveHome, PourWater, Training, Idle, TrainGrip]
+stateList = [FillingCup, MoveToFillPose, MoveToScaleCup, PourWater, Training, Idle, TrainGrip]
 

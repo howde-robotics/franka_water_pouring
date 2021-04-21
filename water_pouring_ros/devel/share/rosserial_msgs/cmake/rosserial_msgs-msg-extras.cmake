@@ -1,0 +1,2 @@
+set(rosserial_msgs_MESSAGE_FILES "/home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/src/rosserial/rosserial_msgs/msg/Log.msg;/home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/src/rosserial/rosserial_msgs/msg/TopicInfo.msg")
+set(rosserial_msgs_SERVICE_FILES "/home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/src/rosserial/rosserial_msgs/srv/RequestParam.srv")

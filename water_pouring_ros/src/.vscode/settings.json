@@ -1,0 +1,8 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/devel/lib/python2.7/dist-packages",
+        "/home/benjamin/dragoon/ros_system_dragoon/devel/lib/python2.7/dist-packages",
+        "/home/benjamin/moonranger/autonomy/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages"
+    ]
+}

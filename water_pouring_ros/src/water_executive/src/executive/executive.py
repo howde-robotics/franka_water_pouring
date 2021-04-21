@@ -2,7 +2,7 @@
 import rospy
 import numpy as np 
 import abc
-from std_msgs.msg import String
+from std_msgs.msg import String, Bool, Float32
 import states
 # from water_executive.msg import waterEvents
 
@@ -18,6 +18,10 @@ class WaterExecutive():
             self.stateDict[temp.stateName] = temp
 
         self.state = self.stateDict[entryState]
+
+        self.pump_is_done = False
+        self.mass_target = 0.0
+        self.maxMass = 500000
 
         # events for the system
         self.eventDict = states.eventDict
@@ -65,15 +69,23 @@ class WaterExecutive():
             print("[EVENTS] %s changed to %r" % (target, self.eventDict[target]))
 
     # all the ros stuff
+    def massTargetCallback(self, mass_target_msg):
+        self.mass_target = mass_target_msg.data
+
+    def pumpIsDoneCallback(self, pump_is_done_msg):
+        self.pump_is_done = pump_is_done_msg.data
+
     def rosInterface(self):
         self.timerFreq = float(rospy.get_param("~exec_spin_rate", '20'))
         self.subEvents = rospy.Subscriber("/water_pouring/events", String, queue_size=1, callback=self.eventCallback)
-        # self.statePublisher = rospy.Publisher("/water_pouring/state", waterEvents, queue_size=1)
+        self.pumpPub = rospy.Publisher("/toggle_pump_to_cup", Bool, queue_size=1)
+        self.targetCupSub = rospy.Subscriber("/mass_target", Float32, queue_size=1, callback=self.massTargetCallback)
+        self.pumpIsDoneSub = rospy.Subscriber("/pump_is_done", Bool, queue_size=1, callback=self.pumpIsDoneCallback)
 
 
 if __name__ == "__main__":
     # rospy.init_node("water_executive")
     try:
-        executive = WaterExecutive("FillingCup")
+        executive = WaterExecutive("Idle")
     except rospy.ROSInitException:
         pass
