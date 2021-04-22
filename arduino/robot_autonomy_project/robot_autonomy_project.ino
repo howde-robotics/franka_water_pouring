@@ -19,6 +19,7 @@ unsigned long EndTime;
 
 std_msgs::Float32 massTargetData;
 std_msgs::Float32 massFillData;
+std_msgs::Bool pumpIsDoneData;
 bool pumpCupCmd = false;
 bool pumpFillCmd = false;
 
@@ -37,6 +38,7 @@ kState state = idle;
 
 ros::Publisher massTargetDataPub("mass_target", &massTargetData);
 ros::Publisher massFillDataPub("mass_fill", &massFillData);
+ros::Publisher pumpIsDonePub("pump_is_done", &pumpIsDoneData);
 
 void togglePumpCup(const std_msgs::Bool& msg) {
 
@@ -61,9 +63,12 @@ void setup()
   pinMode(pumpToFillPin, OUTPUT);
   digitalWrite(pumpToFillPin, HIGH);
 
+  pumpIsDoneData.data = true;
+
   nh.initNode();
   nh.advertise(massTargetDataPub);
   nh.advertise(massFillDataPub);
+  nh.advertise(pumpIsDonePub);
   nh.subscribe(togglePumpCupSub);
   delay(3000);
 }
@@ -71,7 +76,7 @@ void setup()
 void loop()
 {
   float temp = scaleTarget.get_units(1);
-  if (temp > 50000 && temp < 350000)
+  if (temp > 50000 && temp < 600000)
   {
     scaleTarget_data = (emaAlpha * temp) + (1.0 - emaAlpha) * scaleTarget_data;
     massTargetData.data = scaleTarget_data;
@@ -79,7 +84,7 @@ void loop()
   }
 
   temp = scaleFill.get_units(1);
-  if (temp > 150000 && temp < 450000)
+  if (temp > 50000 && temp < 300000)
   {
     scaleFill_data = (emaAlpha * temp) + (1.0 - emaAlpha) * scaleFill_data;
     massFillData.data = scaleFill_data;
@@ -89,7 +94,7 @@ void loop()
 
   if (state == pumpToFillCup)
   {
-    if (scaleFill_data < 350000)
+    if (scaleFill_data < 200000)
     {
       pumpFillCmd = true;
     } else
@@ -99,13 +104,14 @@ void loop()
     }
   } else if (state == pumpToFrankaCup)
   {
-    if (scaleFill_data > 200000)
+    if (scaleFill_data > 100000)
     {
       pumpCupCmd = true;
     } else
     {
       pumpCupCmd = false;
       state = idle;
+      pumpIsDonePub.publish(&pumpIsDoneData);
     }
   }
  
