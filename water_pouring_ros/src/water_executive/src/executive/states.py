@@ -8,47 +8,10 @@ import numpy as np
 print("[STATES] Starting Robot")
 Franka = FrankaArm()
 
-# targets with GRIPPER
-targetResCupGripper = RigidTransform(
-    rotation = np.array([[ 0.99859754,  0.00794212,  0.05216007],
-                         [ 0.00697227, -0.99979027,  0.01874966],
-                         [ 0.05229804, -0.01835969, -0.99846271]]),
-    translation = np.array([0.42077702, 0.31785366, 0.38082516]),
-    from_frame="franka_tool",
-    to_frame="world"
-    )
-
-targetFillCupGripper = RigidTransform(
-    rotation = np.array([[ 0.99991559, -0.0016129 ,  0.01212235],
-                         [-0.00173914, -0.99993467,  0.01041035],
-                         [ 0.01210476, -0.01043055, -0.99987233]]),
-    translation = np.array([0.547199, 0.03331735, 0.20330742]),
-    from_frame="franka_tool",
-    to_frame="world"
-    )
-
-targetPourCupGripper = RigidTransform(
-    rotation = np.array([[ 0.99875038, -0.04795637,  0.01336468],
-                         [-0.04786111, -0.99881725, -0.00735915],
-                         [ 0.01370179,  0.0067103,  -0.99988361]]),
-    translation=np.array([ 0.38429699, -0.28107915,  0.56759486]),
-    from_frame="franka_tool",
-    to_frame="world"
-
-)
 
 jointFillCup =  np.array([-0.00523853, -0.02406041,  0.00771755, -2.39707949, -0.0693488,   3.73495897,  0.78488679])
 jointPourCup = np.array([ 0.59937575, -0.70281775, -1.05938841, -2.45454394, -0.72683186,  3.53392083, 0.78463731])
 jointPour = np.array([ 0.59937575, -0.70281775, -1.05938841, -2.45454394, -0.72683186,  3.53392083, np.pi/1.2])
-
-targetPourWater = RigidTransform(
-    rotation = np.array([[-0.03620562, -0.00390866,  0.99933672],
-                         [-0.7004525,  -0.71314301, -0.02816644],
-                         [ 0.71278008, -0.70100769,  0.02308195]]),
-    translation=np.array([ 0.40814904, -0.06825581,  0.57436334]),
-    from_frame='franka_tool',
-    to_frame="world"
-)
 
 eventDict = {
     "GOAL_REACHED"      :False,
