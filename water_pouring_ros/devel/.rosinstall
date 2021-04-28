@@ -1,2 +1,2 @@
 - setup-file:
-    local-name: /home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/devel/setup.sh
+    local-name: /home/danbronzy/ws/franka_water_pouring/water_pouring_ros/devel/setup.sh

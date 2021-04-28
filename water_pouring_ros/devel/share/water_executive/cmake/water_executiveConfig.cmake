@@ -67,14 +67,14 @@ set(water_executive_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
-  set(water_executive_SOURCE_PREFIX /home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/src/water_executive)
-  set(water_executive_DEVEL_PREFIX /home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/devel)
+  set(water_executive_SOURCE_PREFIX /home/danbronzy/ws/franka_water_pouring/water_pouring_ros/src/water_executive)
+  set(water_executive_DEVEL_PREFIX /home/danbronzy/ws/franka_water_pouring/water_pouring_ros/devel)
   set(water_executive_INSTALL_PREFIX "")
   set(water_executive_PREFIX ${water_executive_DEVEL_PREFIX})
 else()
   set(water_executive_SOURCE_PREFIX "")
   set(water_executive_DEVEL_PREFIX "")
-  set(water_executive_INSTALL_PREFIX /home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/install)
+  set(water_executive_INSTALL_PREFIX /home/danbronzy/ws/franka_water_pouring/water_pouring_ros/install)
   set(water_executive_PREFIX ${water_executive_INSTALL_PREFIX})
 endif()
 
@@ -91,9 +91,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(water_executive_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT "/home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/devel/include " STREQUAL " ")
+if(NOT "/home/danbronzy/ws/franka_water_pouring/water_pouring_ros/devel/include " STREQUAL " ")
   set(water_executive_INCLUDE_DIRS "")
-  set(_include_dirs "/home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/devel/include")
+  set(_include_dirs "/home/danbronzy/ws/franka_water_pouring/water_pouring_ros/devel/include")
   if(NOT " " STREQUAL " ")
     set(_report "Check the issue tracker '' and consider creating a ticket if the problem has not been reported yet.")
   elseif(NOT " " STREQUAL " ")
@@ -110,7 +110,7 @@ if(NOT "/home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/de
         message(FATAL_ERROR "Project 'water_executive' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  ${_report}")
       endif()
     else()
-      message(FATAL_ERROR "Project 'water_executive' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/src/water_executive/${idir}'.  ${_report}")
+      message(FATAL_ERROR "Project 'water_executive' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/danbronzy/ws/franka_water_pouring/water_pouring_ros/src/water_executive/${idir}'.  ${_report}")
     endif()
     _list_append_unique(water_executive_INCLUDE_DIRS ${include})
   endforeach()
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/devel/lib;/home/benjamin/franka_ws/frankapy-public/catkin_ws/devel/lib;/home/benjamin/franka_projects/franka_water_pouring/water_pouring_ros/devel/lib;/home/benjamin/dragoon/ros_system_dragoon/devel/lib;/home/benjamin/moonranger/autonomy/devel/lib;/opt/ros/melodic/lib)
+    foreach(path /home/danbronzy/ws/franka_water_pouring/water_pouring_ros/devel/lib;/home/danbronzy/ws/frankapy-public/catkin_ws/devel/lib;/opt/ros/melodic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
