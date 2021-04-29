@@ -86,9 +86,13 @@ class RRTConnect:
                 return False
         return True
 
-    def extend(self, tree_0, tree_1, constraint=None):
+    def extend(self, tree_0, tree_1, constraint=None, q_target):
         while True:
             q_sample = self.sample_valid_joints()
+
+            #GOAL BIAS
+            if np.random.uniform(0,1)<0.5:
+                q_sample = q_target
 
             times = {}
 
@@ -142,7 +146,7 @@ class RRTConnect:
             if n_nodes_sampled > 0 and n_nodes_sampled % 100 == 0:
                 print('RRT: Sampled {} nodes'.format(n_nodes_sampled))
 
-            reached_target, node_id_new, node_id_1, dist = self.extend(tree_0, tree_1, constraint)
+            reached_target, node_id_new, node_id_1, dist = self.extend(tree_0, tree_1, constraint, q_target)
 
             pt = tree_0.get_point(node_id_new)
             if q_start_is_tree_0:
