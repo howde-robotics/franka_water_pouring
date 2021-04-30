@@ -9,9 +9,8 @@ print("[STATES] Starting Robot")
 Franka = FrankaArm()
 
 
-jointFillCup =  np.array([-0.00523853, -0.02406041,  0.00771755, -2.39707949, -0.0693488,   3.73495897,  0.78488679])
-jointPourCup = np.array([ 0.59937575, -0.70281775, -1.05938841, -2.45454394, -0.72683186,  3.53392083, 0.78463731])
-jointPour = np.array([ 0.59937575, -0.70281775, -1.05938841, -2.45454394, -0.72683186,  3.53392083, np.pi/1.2])
+jointFillCup =   np.array([-0.00523853, -0.02406041,  0.00771755, -2.39707949, -0.0693488,   3.73495897,  0.78488679])
+jointPourCup =   np.array([ 0.59937575, -0.70281775, -1.05938841, -2.45454394, -0.72683186,  3.53392083, 0.78463731])
 
 eventDict = {
     "GOAL_REACHED"      :False,
@@ -153,7 +152,51 @@ class PourWater(StateName):
 
     def run(self, context):
         context.eventDict["GOAL_REACHED"] = False
-        Franka.goto_joints(jointPour)
+
+        startPourPose = Franka.get_pose()
+
+        rot69 = RigidTransform(
+            rotation=RigidTransform.z_axis_rotation(np.deg2rad(69)),
+            from_frame='franka_tool', to_frame='franka_tool'
+        )
+        rot26 = RigidTransform(
+            rotation=RigidTransform.z_axis_rotation(np.deg2rad(26)),
+            from_frame='franka_tool', to_frame='franka_tool'
+        )
+        rot20 = RigidTransform(
+            rotation=RigidTransform.z_axis_rotation(np.deg2rad(20)),
+            from_frame='franka_tool', to_frame='franka_tool'
+        )
+
+        h1 = 0.05
+        h2 = 0.1
+        pour69 = startPourPose * rot69
+        pour95 = pour69 * rot26
+        pour95.translation += [0,-0.02,h1] #move towards cup, up a little
+
+        pour115_high = pour95 * rot20
+        pour115_high.translation += [0,-0.05,h2] #close to cup, up more
+        pour115_low = pour95 * rot20
+        pour115_low.translation += [0,-0.05,-h1] #back down
+
+        #Run through the sequence
+        forceThresh1 = 3.75
+        forceThresh2 = 2.75
+
+        currForceTorque = Franka.get_ee_force_torque()
+        Franka.goto_pose(pour69, duration=2, block=False)
+        while currForceTorque[2] > forceThresh1 or not Franka.is_skill_done():
+            currForceTorque = Franka.get_ee_force_torque()
+        
+        Franka.goto_pose(pour95, duration=1, block=False)
+        while currForceTorque[2] > forceThresh2 or not Franka.is_skill_done():
+            currForceTorque = Franka.get_ee_force_torque()
+        
+        Franka.goto_pose(pour115_high, duration=1)
+        Franka.goto_pose(pour115_low, duration=1)
+        
+        # currForceTorque = Franka.get_ee_force_torque()
+
 
         if context.mass_target > context.maxMass:
             context.eventDict["SCALE_WATER_HIGH"] = True
