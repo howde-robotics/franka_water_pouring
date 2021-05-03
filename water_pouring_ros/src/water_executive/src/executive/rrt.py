@@ -11,28 +11,12 @@ from rrt_connect_solutions import RRTConnect
 
 sim = False
 
-def is_in_collision(joints):
-        for box in boxes:
-            if fr.check_box_collision(joints, box):
-                return True
-        return False
-
-def rrt(joints_start, joints_target):
-    fr = FrankaRobot()
-    if sim == False:
-        fa = FrankaArm()
-    else:
-        rospy.init_node('rrt')
-
-    '''
-    Replace obstacle box w/ the box specs in your workspace:
-    [x, y, z, r, p, y, sx, sy, sz]
-    '''
+def is_in_collision(fr, joints):
     boxes = np.array([
         # obstacles
         # [0.421622825,   0,  0.1305953575,   0,  0,  0,  0.31334051, 0.10121369, 0.261190715],
         # Bin long side, close to base
-        [0.34921784, -0.033652695,  0.195,   0,  0,  0,  0.013, 1.02, 0.41],
+        # [0.34921784, -0.033652695,  0.195,   0,  0,  0,  0.013, 1.02, 0.41],
         # Bin long side, far from base
         [0.62458445, -0.033652695,  0.195,   0,  0,  0,  0.013, 1.02, 0.41],
         # Bin short side, left
@@ -43,21 +27,71 @@ def rrt(joints_start, joints_target):
         [0.468643045, 0.21122816,  0.14867416,   0,  0,  0,  0.14, 0.18, 0.26],
         # Filled cup
         [0.476698805, -0.327612425,  0.132119655,   0,  0,  0,  0.14, 0.18, 0.26],
-        # sides
-        [0.15, 0.46, 0.5, 0, 0, 0, 1.2, 0.01, 1.1],
-        [0.15, -0.46, 0.5, 0, 0, 0, 1.2, 0.01, 1.1],
-        # back
-        [-0.41, 0, 0.5, 0, 0, 0, 0.01, 1, 1.1],
-        # front
-        [0.75, 0, 0.5, 0, 0, 0, 0.01, 1, 1.1],
-        # top
-        [0.2, 0, 1, 0, 0, 0, 1.2, 1, 0.01],
-        # bottom
-        [0.2, 0, -0.05, 0, 0, 0, 1.2, 1, 0.01]
+        # # sides
+        # [0.15, 0.46, 0.5, 0, 0, 0, 1.2, 0.01, 1.1],
+        # [0.15, -0.46, 0.5, 0, 0, 0, 1.2, 0.01, 1.1],
+        # # backs
+        # [-0.41, 0, 0.5, 0, 0, 0, 0.01, 1, 1.1],
+        # # front
+        # [0.75, 0, 0.5, 0, 0, 0, 0.01, 1, 1.1],
+        # # top
+        # [0.2, 0, 1, 0, 0, 0, 1.2, 1, 0.01],
+        # # bottom
+        # [0.2, 0, -0.05, 0, 0, 0, 1.2, 1, 0.01]
     ])
 
+    for box in boxes:
+        if fr.check_box_collision(joints, box):
+            print(joints)
+            print("in collision")
+            print(box)
+            return True
+    return False
+
+def rrt(franka_arm, sim, joints_start, joints_target):
+    fr = FrankaRobot()
+    if sim == False:
+        fa = franka_arm
+    else:
+        rospy.init_node('rrt')
+
+    '''
+    Replace obstacle box w/ the box specs in your workspace:
+    [x, y, z, r, p, y, sx, sy, sz]
+    '''
+    # boxes = np.array([
+    #     # obstacles
+    #     # [0.421622825,   0,  0.1305953575,   0,  0,  0,  0.31334051, 0.10121369, 0.261190715],
+    #     # Bin long side, close to base
+    #     [0.34921784, -0.033652695,  0.195,   0,  0,  0,  0.013, 1.02, 0.41],
+    #     # Bin long side, far from base
+    #     [0.62458445, -0.033652695,  0.195,   0,  0,  0,  0.013, 1.02, 0.41],
+    #     # Bin short side, left
+    #     [0.486901145, 0.38266821,  0.195,   0,  0,  0,  0.51, 0.076, 0.41],
+    #     # Bin short side, right
+    #     [0.486901145, -0.4499736,  0.195,   0,  0,  0,  0.51, 0.076, 0.41],
+    #     # Filling cup
+    #     [0.468643045, 0.21122816,  0.14867416,   0,  0,  0,  0.14, 0.18, 0.26],
+    #     # Filled cup
+    #     [0.476698805, -0.327612425,  0.132119655,   0,  0,  0,  0.14, 0.18, 0.26],
+    #     # sides
+    #     [0.15, 0.46, 0.5, 0, 0, 0, 1.2, 0.01, 1.1],
+    #     [0.15, -0.46, 0.5, 0, 0, 0, 1.2, 0.01, 1.1],
+    #     # backs
+    #     [-0.41, 0, 0.5, 0, 0, 0, 0.01, 1, 1.1],
+    #     # front
+    #     [0.75, 0, 0.5, 0, 0, 0, 0.01, 1, 1.1],
+    #     # top
+    #     [0.2, 0, 1, 0, 0, 0, 1.2, 1, 0.01],
+    #     # bottom
+    #     [0.2, 0, -0.05, 0, 0, 0, 1.2, 1, 0.01]
+    # ])
+
+    # rrt = RRTConnect(fr, is_in_collision(fr, franka_arm.get_joints(),boxes))
     rrt = RRTConnect(fr, is_in_collision)
+    # print("starting to find plan")
     plan = rrt.plan(joints_start, joints_target, None)
+    # print("plan found")
 
 
     if sim:
@@ -101,18 +135,23 @@ def rrt(joints_start, joints_target):
                 # break
 
         print('Running plan...')
-        fa.goto_joints(joints_start)
+        # fa.goto_joints(joints_start)
         forward_plan = plan[::4]
-        backward_plan = forward_plan[::-1]
+        # backward_plan = forward_plan[::-1]
 
-        while True:
-            for joints in tqdm(forward_plan):
-                fa.goto_joints(joints, duration=max(float(max(joints - fa.get_joints()) / 0.1), 1))
-                sleep(0.1)
-            sleep(1)
-            for joints in tqdm(backward_plan):
-                fa.goto_joints(joints, duration=max(float(max(joints - fa.get_joints()) / 0.1), 1))
-                sleep(0.1)
+
+
+        
+
+        # while True:
+        for joints in tqdm(forward_plan):
+            # fa.goto_joints(joints, duration=max(float(max(joints - fa.get_joints()) / 0.1), 1))
+            fa.goto_joints(joints, duration=3)
+            #     sleep(0.1)
+            # sleep(1)
+            # for joints in tqdm(backward_plan):
+            #     fa.goto_joints(joints, duration=max(float(max(joints - fa.get_joints()) / 0.1), 1))
+            #     sleep(0.1)
 
 # if __name__ == '__main__':
 #     parser = argparse.ArgumentParser()

@@ -1,0 +1,19 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/danbronzy/ws/franka_water_pouring/water_pouring_ros/devel/include/**",
+        "/home/danbronzy/ws/frankapy-public/catkin_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/danbronzy/ws/franka_water_pouring/water_pouring_ros/src/water_executive/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

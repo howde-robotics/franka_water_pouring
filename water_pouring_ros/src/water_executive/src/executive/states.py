@@ -3,6 +3,7 @@ from frankapy import FrankaArm
 from std_msgs.msg import Bool
 import time
 import numpy as np
+from rrt import rrt
 
 # main franka object
 print("[STATES] Starting Robot")
@@ -85,7 +86,9 @@ class Idle(StateName):
         self.transitionTable = [
             ("TRAIN", "Training"),
             ("TRAIN_GRIP", "TrainGrip"),
-            ("SCALE_WATER_LOW", "FillingCup"),
+            ("SCALE_WATER_LOW", "MoveToFillPose"),
+            # ("SCALE_WATER_LOW", "FillingCup"),
+            # ("FILL_WATER_LOW", "FillingCup"),
             ("TRAIN_POUR", "MoveToScaleCup"),
             ("TRAIN_FILL", "MoveToFillPose")
             ] 
@@ -109,7 +112,8 @@ class FillingCup(StateName):
         self.hasPumped = False
 
     def run(self, context):
-        Franka.goto_joints(jointFillCup)
+        context.eventDict["GOAL_REACHED"] = False
+        # Franka.goto_joints(jointFillCup)
         
         pump = Bool()
         pump.data = True
@@ -125,10 +129,11 @@ class FillingCup(StateName):
 class MoveToFillPose(StateName):
     def __init__(self):
         self.stateName = "MoveToFillPose"
-        self.transitionTable = [("GOAL_REACHED", "Idle"),("IDLE", "Idle")]  
+        self.transitionTable = [("GOAL_REACHED", "FillingCup"),("IDLE", "Idle")]  
 
     def run(self, context):
-        Franka.goto_joints(jointFillCup)
+        # Franka.goto_joints(jointFillCup)
+        rrt(Franka, False, Franka.get_joints(),jointFillCup)
         context.eventDict["GOAL_REACHED"] = True
 
 
@@ -140,7 +145,8 @@ class MoveToScaleCup(StateName):
 
     def run(self, context):
         context.eventDict["FILL_WATER_LOW"] = False
-        Franka.goto_joints(jointPourCup)
+        # Franka.goto_joints(jointPourCup)
+        rrt(Franka, False, Franka.get_joints(),jointPourCup)
         context.eventDict["GOAL_REACHED"] = True
 
 
