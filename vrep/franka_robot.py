@@ -7,7 +7,7 @@ class FrankaEmika(vri.vrepBot):
     ''' Franka Emika Panda robot for use with VREP simulation. '''
 
     def __init__(self):
-        super().__init__()
+        # super().__init__()
 
         # joint number
         self.jointNum = 7
@@ -40,11 +40,11 @@ class FrankaEmika(vri.vrepBot):
             self.linkTransforms[:, :, i] = homogTrans(link[0:3], link[3:])
         
         # connect to simulation on initializing
-        self.connect()
+        # self.connect()
 
     
-    def __del__(self):
-        self.shutdown()
+    # def __del__(self):
+        # self.shutdown()
 
 
     def forward(self, qVal):
@@ -145,6 +145,8 @@ class FrankaEmika(vri.vrepBot):
 if __name__ == "__main__":
     robot = FrankaEmika()
     robot.forward([0,-np.pi/4,0,-np.pi/2,0,np.pi/4, 0])
+    print(robot.currentTransforms[:, :, 6])
+    print()
     goal = np.array([[1, 0,  0, 0.75],
                      [0, 0, -1, -0.1], 
                      [0, 1,  0, 0.45],
